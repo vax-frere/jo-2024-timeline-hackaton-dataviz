@@ -26,7 +26,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build  --outDir docs --base jo-2024-timeline-hackaton-dataviz",
     "preview": "vite preview"
   },
   "browserslist": [
