@@ -18,8 +18,20 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
 	<title>Calendrier J.O. 2024</title>
-  <script type="module" crossorigin src="/jo-2024-timeline-hackaton-dataviz/assets/index-BAFQNZmf.js"></script>
-  <link rel="stylesheet" crossorigin href="/jo-2024-timeline-hackaton-dataviz/assets/index-Y9NAO55M.css">
+  <style>
+    body {
+      background:white;
+      display: none;
+      opacity: 0;
+    }
+    
+    body.loaded {
+      display: block;
+      opacity: 1;
+    }
+    </style>
+  <script type="module" crossorigin src="/jo-2024-timeline-hackaton-dataviz/assets/index-BspspW26.js"></script>
+  <link rel="stylesheet" crossorigin href="/jo-2024-timeline-hackaton-dataviz/assets/index-Bb1Uzanh.css">
 </head>
 
 <body>
@@ -39,7 +51,8 @@
     <p> Scroll pour avancer</p>
   </div>
   <p id="credits">
-  <a href="https://toulouse-dataviz.fr/hackaviz/2024-data/">Dataset</a> du Hackaton dataviz grenoble 2024<br/>Réalisation de Benjamin VAXELAIRE et Thibaud FRERE</p>
+  Clique : Filtre par type d'épreuve en cliquant sur une tuile.<br/> Cliquer ailleurs pour reset le filtre.<br/><br/>
+  <a href="https://toulouse-dataviz.fr/hackaviz/2024-data/">Dataset</a> du Hackaton dataviz Toulouse 2024<br/>Réalisation de  <a href="https://datawrap.fr/" target="_blank">Benjamin VAXELAIRE</a> et <a href="https://tfrere.com/" target="_blank">Thibaud FRERE</a></p>
 	<!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
@@ -50,5 +63,7 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+
+
 
 </body>
