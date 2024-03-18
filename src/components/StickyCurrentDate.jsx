@@ -26,7 +26,7 @@ function isNightTime(date) {
   return hour >= config.nightLateTime || hour < config.nightEarlyTime
 }
 
-const zPos = 0
+const zPos = -0.1
 
 function StickyCurrentDate(props) {
   return (
@@ -42,21 +42,48 @@ function StickyCurrentDate(props) {
       <Text
         children={props.currentDate?.month}
         textAlign={'left'}
-        anxhorX={'left'}
+        anchorX={'left'}
         anchorY="bottom"
         color={'black'}
-        position={[16, props.maxLevel - 6, 0]}
-        fontSize={2}
+        position={[13, props.maxLevel - 6.4, zPos - 0.05]}
+        fontSize={2.5}
       />
       <Text
-        position={[-5, props.maxLevel - 3.6, zPos - 0.05]}
+        // position={[-5, props.maxLevel - 3.7, zPos - 0.05]}
+        position={[13, props.maxLevel - 9.6, zPos - 0.05]}
         color={config.bigHourLabelColor}
         textAlign={'left'}
         anchorX="left"
-        anchorY="top"
-        fontSize={2}>
+        anchorY="bottom"
+        fontSize={2.5}>
         {props.currentDate?.hour + 'h'}
       </Text>
+      {props.activeSport !== '' && props.activeSport !== null ? (
+        <>
+          <Text
+            // position={[-5, props.maxLevel - 3.7, zPos - 0.05]}
+            position={[3, props.maxLevel - 13.6, zPos - 0.05]}
+            color={config.bigHourLabelColor}
+            textAlign={'left'}
+            anchorX="left"
+            anchorY="bottom"
+            fontSize={1.2}>
+            FILTRE ACTIF
+          </Text>
+
+          <Text
+            // position={[-5, props.maxLevel - 3.7, zPos - 0.05]}
+            position={[3, props.maxLevel - 16.6, zPos - 0.05]}
+            color={'black'}
+            textAlign={'left'}
+            anchorX="left"
+            anchorY="bottom"
+            fontSize={2.5}>
+            {props.activeSport}
+          </Text>
+        </>
+      ) : null}
+
       {/* {isNightTime(props.currentDate?.date) ? (
         <Image position={[-5, props.maxLevel - 5.7, zPos + 2.5]} scale={[4, 4, 1]} opacity={0.2} transparent url={moonUrl} />
       ) : (
@@ -67,8 +94,8 @@ function StickyCurrentDate(props) {
       </Text> */}
       <Line
         points={[
-          [0, props.maxLevel, zPos],
-          [0, 0, zPos]
+          [0, props.maxLevel, 0],
+          [0, 0, 0]
         ]}
         color={'black'}
         lineWidth={3}

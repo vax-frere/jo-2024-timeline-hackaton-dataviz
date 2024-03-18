@@ -1,44 +1,61 @@
-import { useRef, useState } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { useRef, useState, Suspense } from 'react'
+import { Canvas } from '@react-three/fiber'
 import { OrbitControls, ScrollControls, PerspectiveCamera, Grid, Text, Stats, Loader } from '@react-three/drei'
 import Timeline from './components/Timeline.jsx'
 import StaticCurrentTimeCursor from './components/StaticCurrentTimeCursor.jsx'
 import Menu from './components/Menu.jsx'
 import config from './config.js'
 
-export default function App() {
+function App() {
   const [activeIndex, setActiveIndex] = useState(1)
+  const [isLoading, setIsLoading] = useState(true) // Ajoutez un état pour suivre le chargement
+
+  //
+
   return (
     <>
-      <Loader />
-      <div id="legend">
-        {'Légende :\n'}
-        {config.colorScaleDomain.map((eventType, i) => (
-          <span key={i}>
-            {eventType}
-            <span className="circle" style={{ backgroundColor: config.colorScaleRange[i] }}></span>
-          </span>
-        ))}
-      </div>
-      <Canvas
-        // camera={{ fov: config.fov, near: config.nearClipPlane, far: config.farClipPlane }}
-        powerPreference="high-performance"
-        gl={{ antialias: true, alpha: false }}>
-        {/* {config.showStats && (
-          <>
-            <Stats />
-          </>
-        )} */}
-        {/* <axesHelper scale={40} position={[0, 0, 0]} onUpdate={(self) => self.setColors('#ff2080', '#20ff80', '#2080ff')} /> */}
-        {/* <Grid scale={1} /> */}
+      {!isLoading && (
+        <div id="preloader">
+          <p>Chargement...</p>
+        </div>
+      )}
 
-        <color attach="background" args={[config.backgroundColor]} />
-        <ScrollControls pages={4.7} damping={0.5}>
-          <StaticCurrentTimeCursor />
-          <Timeline activeIndex={activeIndex} />
-        </ScrollControls>
-      </Canvas>
-      <Menu activeIndex={activeIndex} setActiveIndex={setActiveIndex} />
+      <Suspense
+        fallback={
+          <Loader
+            dataInterpolation={(p) => `Chargement ${p.toFixed(2)}%`} // Affiche le pourcentage de chargement
+            onLoaded={() => {
+              // console.log(123)
+              // // setIsLoading(false)
+              // // ajoute la classe loaded au body
+              // document.body.classList.add('loaded')
+            }} // Quand le chargement est terminé, mettez à jour l'état
+          />
+        }>
+        <>
+          {document.body.classList.add('loaded')}
+          <div id="legend">
+            {'Légende :\n'}
+            {config.colorScaleDomain.map((eventType, i) => (
+              <span key={i}>
+                {eventType}
+                <span className="circle" style={{ backgroundColor: config.colorScaleRange[i] }}></span>
+              </span>
+            ))}
+          </div>
+          <Canvas powerPreference="high-performance" gl={{ antialias: true, alpha: true }}>
+            {config.showStats && <Stats />}
+            <color attach="background" args={[config.backgroundColor]} />
+            <ScrollControls pages={4.7} damping={0.3}>
+              <StaticCurrentTimeCursor />
+              <Timeline activeIndex={activeIndex} />
+            </ScrollControls>
+          </Canvas>
+          <Menu activeIndex={activeIndex} setActiveIndex={setActiveIndex} />
+        </>
+      </Suspense>
     </>
   )
 }
+
+export default App

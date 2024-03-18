@@ -17,7 +17,7 @@ export const Counter = ({ value, ...props }) => {
       ))}
 
       <Mask id={1}>
-        <planeGeometry args={[30, 8]} />
+        <planeGeometry args={[30, 7.2]} />
       </Mask>
     </group>
   )
@@ -26,11 +26,11 @@ export const Counter = ({ value, ...props }) => {
 function CounterInner({ index, value, speed = 0.1 }) {
   const ref = useRef()
   const stencil = useMask(1)
-  useFrame((state, delta) => easing.damp(ref.current.position, 'y', value * -8, speed, delta))
+  useFrame((state, delta) => easing.damp(ref.current.position, 'y', value * -7.2, speed, delta))
   return (
     <group position-x={index * 4} ref={ref}>
       {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((number) => (
-        <Text key={number} position={[0, number * 8, 0]} color={'black'} fontSize={8}>
+        <Text key={number} position={[0, number * 7.2, 0]} color={'black'} fontSize={7.2}>
           {number}
           <meshBasicMaterial {...stencil} />
         </Text>

@@ -2,7 +2,7 @@ import { Line, Text, Plane } from '@react-three/drei'
 import * as d3 from 'd3'
 import config from '../config.js'
 
-const zPos = -0.1
+const zPos = -0.2
 
 const Ticks = ({ startDate, endDate, scale, size, maxLevel }) => {
   const dayTicks = d3.timeDay.range(startDate, endDate, 1)
@@ -33,6 +33,30 @@ const Ticks = ({ startDate, endDate, scale, size, maxLevel }) => {
   }
 
   const intermediateLines = generateIntermediateLines(maxLevel)
+  const generateIntermediatePlanes = (maxLevel, spacing = 3, offset = 0.2) => {
+    const planes = []
+    let i = 0
+    for (let y = offset; y < maxLevel; y += spacing + offset) {
+      const height = spacing // La hauteur d'un niveau est de 3
+      const planeY = y + height / 2 // Centre le plane verticalement dans le niveau
+      i++
+      if (i % 2 === 0) {
+        planes.push(
+          <Plane
+            key={`plane-${y}`}
+            args={[size, height, 1, 1]} // Taille du plane en fonction de la longueur de la timeline et de la hauteur d'un niveau
+            position={[size / 2, planeY, zPos]} // Positionne le plane au centre de la timeline et au niveau y
+            rotation={[0, 0, 0]}>
+            <meshBasicMaterial attach="material" color="lightgrey" transparent opacity={0.23} />
+          </Plane>
+        )
+      }
+    }
+    return planes
+  }
+
+  // Puis dans le composant de rendu, vous pouvez appeler cette fonction pour obtenir les planes intermédiaires :
+  const intermediatePlanes = generateIntermediatePlanes(maxLevel)
 
   // Fonction pour générer et afficher des rectangles pour chaque plage horaire nocturne
   const generateNightRectangles = () => {
@@ -80,7 +104,7 @@ const Ticks = ({ startDate, endDate, scale, size, maxLevel }) => {
   return (
     <>
       <Text
-        position={[0, maxLevel + 2, 0]} // Ajustez cette position selon vos besoins
+        position={[0, maxLevel + 2.3, 0]} // Ajustez cette position selon vos besoins
         color={config.hourLabelColor}
         fontWeight={'black'}
         anchorX="center"
@@ -90,7 +114,7 @@ const Ticks = ({ startDate, endDate, scale, size, maxLevel }) => {
         Début
       </Text>
       <Text
-        position={[endX, maxLevel + 2, 0]} // Ajustez cette position selon vos besoins
+        position={[endX, maxLevel + 2.5, 0]} // Ajustez cette position selon vos besoins
         color={config.hourLabelColor}
         fontWeight={'black'}
         anchorX="center"
@@ -141,17 +165,21 @@ const Ticks = ({ startDate, endDate, scale, size, maxLevel }) => {
         )
       })}
       {generateNightRectangles()}
+      {}
       {intermediateLines.map((points, index) => (
-        <Line
-          key={`intermediate-line-${index}`}
-          points={points}
-          position={[0, 0, zPos]}
-          color={config.intermediateLineColor}
-          lineWidth={config.intermediateLineWeight}
-          transparent
-          opacity={1}
-        />
+        <group key={`intermediate-line-${index}`}>
+          <Line
+            points={points}
+            position={[0, 0, zPos]}
+            color={config.intermediateLineColor}
+            lineWidth={config.intermediateLineWeight}
+            transparent
+            opacity={1}
+          />
+        </group>
       ))}
+      {intermediatePlanes}
+
       {hourTicks.map((tick, index) => {
         const x = scale(tick)
         return (

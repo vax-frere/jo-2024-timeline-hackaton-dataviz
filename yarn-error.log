@@ -1,0 +1,63 @@
+Arguments: 
+  /usr/local/bin/node /opt/yarn-v1.22.19/bin/yarn.js add react-spring
+
+PATH: 
+  /usr/lib/git-core/:/usr/local/share/nvm/current/bin:/usr/local/share/npm-global/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/.local/bin
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  20.11.0
+
+Platform: 
+  linux x64
+
+Trace: 
+  Error: ENOENT: no such file or directory, copyfile '/root/.cache/yarn/v6/npm-globals-13.24.0-8432a19d78ce0c1e833949c36adb345400bb1171-integrity/node_modules/globals/globals.json' -> '/workspaces/workspace/node_modules/@eslint/eslintrc/node_modules/globals/globals.json'
+
+npm manifest: 
+  {
+    "name": "basic-demo",
+    "version": "1.0.0",
+    "description": "Shows how to form self-contained components with their own state and user interaction.",
+    "keywords": [
+      "interaction",
+      "pointer-events"
+    ],
+    "main": "src/index.js",
+    "dependencies": {
+      "@react-three/drei": "9.92.0",
+      "@react-three/fiber": "8.15.12",
+      "@types/three": "0.158.3",
+      "react": "18.2.0",
+      "react-dom": "18.2.0",
+      "react-scripts": "5.0.1",
+      "three": "0.159.0",
+      "d3": "7.9.0",
+      "gh-pages": "6.1.1",
+      "gsap": "3.12.5",
+      "maath": "0.10.7"
+    },
+    "devDependencies": {
+      "@vitejs/plugin-react": "^4.2.1",
+      "vite": "^5.0.11"
+    },
+    "scripts": {
+      "dev": "vite",
+      "build": "vite build  --outDir docs --base jo-2024-timeline-hackaton-dataviz",
+      "preview": "vite preview"
+    },
+    "browserslist": [
+      ">1%",
+      "not dead",
+      "not ie <= 11",
+      "not op_mini all"
+    ]
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

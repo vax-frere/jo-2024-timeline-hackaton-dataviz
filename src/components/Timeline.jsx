@@ -1,9 +1,10 @@
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, useMemo } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useScroll, Line, Html, Text, PerspectiveCamera, Image, OrbitControls, Text3D, Plane } from '@react-three/drei'
 import * as d3 from 'd3'
 import Event from './Event.jsx'
 import StickyCurrentDate from './StickyCurrentDate.jsx'
+import StartingLine from './StartingLine.jsx'
 import { data, datesOlympiques, datesParalympiques, disciplines } from '../../public/dataPrecompute.js'
 
 // console.log(data, datesOlympiques, datesParalympiques)
@@ -13,24 +14,28 @@ import Ticks from './Ticks.jsx'
 import assignLevels from './assignLevels.js'
 
 import config from '../config.js'
-import flameUrl from '../../public/logo-circles.svg'
+import logoJoUrl from '../../public/logo-circles.svg'
+import logoParaUrl from '../../public/paralympique.svg'
 import interBoldUrl from '../../public/inter-bold.json'
 
 function Timeline(props) {
   const scroll = useScroll()
   const uiRef = useRef()
   const [currentDate, setCurrentDate] = useState()
+  const [visibleEvents, setVisibleEvents] = useState([])
+  const [activeSport, setActiveSport] = useState(null)
   const { activeIndex } = props
 
   const totalSize = config.totalSize
   // console.log(eventsWithLevels)
 
   // Filtrer les événements des jeux Paralympiques ou Olympiques
-  const eventsToShow = data.filter((event) => {
-    if (activeIndex === 0) return event.jeux === 'Paralympiques'
-    if (activeIndex === 1) return event.jeux === 'Olympiques'
-  })
-
+  const eventsToShow = useMemo(() => {
+    return data.filter((event) => {
+      if (activeIndex === 0) return event.jeux === 'Paralympiques'
+      if (activeIndex === 1) return event.jeux === 'Olympiques'
+    })
+  }, [data, activeIndex])
   // Trouvez le dernier événement en fonction de la date de fin
   const lastEvent = eventsToShow.reduce((latest, current) => {
     const currentEndDate = new Date(current.fin)
@@ -48,15 +53,21 @@ function Timeline(props) {
   // console.log('eventsToShow', eventsToShow)
 
   const timeline = d3.extent(eventsToShow, (d) => new Date(d.debut))
-  const xScale = d3.scaleTime().domain(timeline).range([0, totalSize])
-  const eventsWithLevels = assignLevels(eventsToShow, xScale)
+  const xScale = useMemo(() => {
+    const timeline = d3.extent(eventsToShow, (d) => new Date(d.debut))
+    return d3.scaleTime().domain(timeline).range([0, totalSize])
+  }, [eventsToShow, totalSize])
+  const eventsWithLevels = useMemo(() => {
+    return assignLevels(eventsToShow, xScale)
+  }, [eventsToShow, xScale])
   const maxLevel = (Math.max(...eventsWithLevels.map((event) => event.level)) + 1) * 3.2
   let maxTutorialScroll = 10
 
   useFrame(({ camera }) => {
-    // console.log('scroll offset', scroll)
-    if (scroll.offset > 3) {
+    if (scroll.offset > 0.005) {
       document.querySelector('#tutorial').classList.add('hidden')
+    } else {
+      document.querySelector('#tutorial').classList.remove('hidden')
     }
     if (!config.debugMode) {
       camera.position.x = scroll.offset * totalSize
@@ -81,6 +92,25 @@ function Timeline(props) {
     else if (month === 'July') month = 'JUILLET'
     // Mettre à jour currentDate avec les nouvelles valeurs
     setCurrentDate({ month, day, hour, date })
+
+    // Obtenez le champ de vision horizontal de la caméra basé sur son fov vertical et l'aspect ratio
+    const vFov = (camera.fov * Math.PI) / 180 // Convertir en radians
+    const cameraHeight = 2 * Math.tan(vFov / 2) * Math.abs(camera.position.z) // Hauteur visible à la distance z
+    const marginFactor = 2.5
+    const cameraWidth = cameraHeight * camera.aspect * marginFactor // Largeur visible
+
+    // Calcul de la plage visible sur l'axe x
+    const visibleXStart = camera.position.x - cameraWidth / 2
+    const visibleXEnd = camera.position.x + cameraWidth / 2
+
+    // Filtrez ici vos événements basé sur visibleXStart et visibleXEnd
+    const visibleEvents = eventsWithLevels.filter((event) => {
+      const eventPositionX = xScale(new Date(event.debut)) // Assurez-vous que cela correspond à la position x de l'événement
+      return eventPositionX >= visibleXStart && eventPositionX <= visibleXEnd
+    })
+
+    setVisibleEvents(visibleEvents)
+    // console.log(visibleEvents.length)
   })
 
   // Déterminer les dates de début et de fin en fonction de l'index actif
@@ -92,7 +122,7 @@ function Timeline(props) {
   // console.log('end', endDate)
 
   // Formatter les dates
-  const format = d3.timeFormat('%d-%m')
+  const format = d3.timeFormat('%d/%m')
   const formattedStartDate = format(startDate)
   const formattedEndDate = format(endDate)
   const year = endDate.getFullYear()
@@ -121,8 +151,19 @@ function Timeline(props) {
         </PerspectiveCamera>
       )}
       <group ref={uiRef} position={[0, 0, 0]}>
-        <StickyCurrentDate ref={uiRef} maxLevel={maxLevel} currentDate={currentDate} />
+        <StickyCurrentDate ref={uiRef} maxLevel={maxLevel} currentDate={currentDate} activeSport={activeSport} />
       </group>
+      {/* <StartingLine size={10} maxLevel={maxLevel} /> */}
+
+      <StartingLine
+        position={[4 * -1.6, maxLevel / 2, 0]}
+        size={maxLevel}
+        density={20}
+        length={4}
+        color1={'rgb(210,210,210)'}
+        color2={'rgb(240,240,240)'}
+      />
+
       <Plane args={[totalSize, maxLevel]} position={[totalSize / 2, maxLevel / 2, -0.3]}>
         <meshBasicMaterial color={config.timelineBackgroundColor} />
       </Plane>
@@ -141,7 +182,13 @@ function Timeline(props) {
         <meshStandardMaterial color="rgb(80,80,80)" />
         {/* <meshNormalMaterial /> */}
       </Text3D>
-      {/* <Image position={[15, maxLevel / 2, 0.5]} scale={[30, 15, 1]} opacity={0.1} transparent url={flameUrl} /> */}
+      <Image
+        position={[-6.2, maxLevel - 6.5, 0.5]}
+        scale={[5, 2.5, 1]}
+        opacity={0.3}
+        transparent
+        url={activeIndex == 1 ? logoJoUrl : logoParaUrl}
+      />
       <Text3D
         position={[config.totalSize + 2, maxLevel / 2 - 5, 0]}
         curveSegments={32}
@@ -168,18 +215,21 @@ function Timeline(props) {
         letterSpacing={-0.06}
         size={2.5}
         font={interBoldUrl}>
-        {`du ${formattedStartDate} au ${formattedEndDate} ${year}`}
+        {`du ${formattedStartDate} au ${formattedEndDate}`}
 
         <meshStandardMaterial color="rgb(200,200,200)" />
         {/* <meshNormalMaterial /> */}
       </Text3D>
 
       <Ticks startDate={timeline[0]} endDate={timeline[1]} scale={xScale} size={totalSize} maxLevel={maxLevel} />
-      {eventsWithLevels.map((eventData, i) => (
+      {visibleEvents.map((eventData, i) => (
         <Event
-          key={i}
+          key={`${eventData.debut}-${eventData.fin}-${eventData.discipline}`}
           data={{ ...eventData, xScale: xScale, index: i }}
           position={[eventData.start, eventData.level * 3.2 + 1.5 + 0.1, 0]} // Exemple de positionnement en fonction du niveau
+          isOdd={eventData.level % 2 === 1 ? true : false}
+          activeSport={activeSport}
+          setActiveSport={setActiveSport}
         />
       ))}
     </>
